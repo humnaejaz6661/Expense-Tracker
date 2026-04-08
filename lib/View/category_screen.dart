@@ -1,90 +1,101 @@
 import 'package:expense_tracker/Controller/controller.dart';
+import 'package:expense_tracker/Core/Theme/appcolor.dart';
+import 'package:expense_tracker/Core/customTextfiled.dart';
+import 'package:expense_tracker/Model/category_screen_model_class.dart';
 import 'package:expense_tracker/View/Components/category_screen_components.dart';
 import 'package:expense_tracker/View/Components/expense_screen_components.dart';
+import 'package:expense_tracker/View/bottom_navbar.dart';
 import 'package:expense_tracker/View/expense_screen.dart';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class CategoryScreen extends StatelessWidget {
-  Controller controller = Get.find<Controller>();
+  // final AppController controller = Get.put(AppController());
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xffefeef1),
-      body: SingleChildScrollView(
-        child: Container(
-          width: double.infinity,
-          // height: MediaQuery.of(context).size.height * 1.0,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                const Color(0xffb092f9),
-                Color(0xffefeef1),
-              ],
-              stops: [0.0, 0.4],
+    return GetBuilder<AppController>(
+      //  init: AppController(),
+      builder: (controller) => Scaffold(
+        extendBodyBehindAppBar: true,
+        //  backgroundColor: Color(0xffefeef1),
+        appBar: AppBar(
+          leading: IconButton(
+            // alignment: Alignment(0.2, 0.0),
+            padding: EdgeInsets.only(left: 9),
+            //  visualDensity: VisualDensity.compact, // touch area ko kam krne k liye use krte ha
+            icon: Icon(Icons.arrow_back_ios),
+            onPressed: () {
+              Get.to(() => BottomNavbarr());
+            },
+          ),
+          title: Text(
+            "Select Category ",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                SizedBox(
-                  height: 50,
+          backgroundColor: Colors.transparent,
+          centerTitle: true,
+        ),
+        body: GestureDetector(
+          onTap: FocusScope.of(context).unfocus,
+          child: SingleChildScrollView(
+            child: Container(
+              width: double.infinity,
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height,
+              ),
+              // height: MediaQuery.of(context).size.height * 1.0,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.primaryColor,
+                    AppColors.secondaryColor,
+                  ],
+                  stops: [0.0, 0.4],
                 ),
-                CategoryScreenComponents.CategoryBar(),
-                SizedBox(
-                  height: 30,
-                ),
-                ExpenseScreenComponents.customtextField(
-                    hinttext: "Category for Search", prefixicon: Icons.search),
-                GridView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 4,
-                        mainAxisSpacing:
-                            2, // Vertical spacing lines ke darmiyan
-                        //crossAxisSpacing: 0,
-                        childAspectRatio: 1.0,
-                        mainAxisExtent: 90),
-                    itemCount: controller.myCategory.length,
-                    itemBuilder: (context, index) {
-                      final item = controller.myCategory[index];
-
-                      return Column(
-                        children: [
-                          InkWell(
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: 110,
+                    ),
+                    CustomTextField(
+                      hintText: "Search for Category",
+                      prefixIcon: Icons.search,
+                    ),
+                    SizedBox(
+                      height: 25,
+                    ),
+                    GridView.builder(
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        physics: NeverScrollableScrollPhysics(),
+                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 4,
+                            // Vertical spacing lines ke darmiyan
+                            // crossAxisSpacing: 8,
+                            //childAspectRatio: 1.0,
+                            mainAxisExtent: 90),
+                        itemCount: controller.myCategory.length,
+                        itemBuilder: (context, index) {
+                          final item = controller.myCategory[index];
+                          return CategoryGrid(
+                            item: item,
                             onTap: () {
-                              Get.to(ExpenseScreen());
+                              controller.selectCategory(item);
                             },
-                            child: Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                color: Color(0xffffffff),
-                              ),
-                              child: Center(
-                                child: Image.asset(
-                                  item.iconpath,
-                                  height: 25,
-                                ),
-                              ),
-                            ),
-                          ),
-                          SizedBox(
-                            height: 2,
-                          ),
-                          CategoryScreenComponents.textWidget(item.name,
-                              Color(0xff211b38), 14, FontWeight.w400),
-                        ],
-                      );
-                    }),
-              ],
+                          );
+                        }),
+                  ],
+                ),
+              ),
             ),
           ),
         ),

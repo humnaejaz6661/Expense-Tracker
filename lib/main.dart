@@ -1,4 +1,4 @@
-import 'package:expense_tracker/View/onboarding_screen.dart';
+import 'package:expense_tracker/View/bottom_navbar.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -13,12 +13,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Expense Tracker',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+
       debugShowCheckedModeBanner: false,
-      home: OnboardingScreen(),
+      //Get.put(AppController());
+      home: BottomNavbarr(),
+      // home: AnalyticsPage(),
     );
   }
 }

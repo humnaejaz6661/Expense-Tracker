@@ -1,64 +1,70 @@
 import 'package:expense_tracker/Model/category_screen_model_class.dart';
+import 'package:expense_tracker/Model/chart_screen_model_class.dart';
 import 'package:expense_tracker/Model/onboarding_screen_model_class.dart';
-import 'package:expense_tracker/View/onboarding_screen.dart';
+import 'package:expense_tracker/View/account_screen.dart';
+import 'package:expense_tracker/View/category_screen.dart';
+import 'package:expense_tracker/View/chart_screen.dart';
+import 'package:expense_tracker/View/expense_screen.dart';
+import 'package:expense_tracker/View/Home/home_screen.dart';
+import 'package:expense_tracker/View/bottom_navbar.dart';
+import 'package:expense_tracker/View/transaction_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
-class Controller extends GetxController {
-  List<OnboardingScreenModelClass> mytransaction = [
-    OnboardingScreenModelClass(
-        imagepath: "assets/images/house.png",
-        title: "Resturant Expense",
-        date: "31 March 2026",
-        amount: "\$400",
-        arrowicon: Icons.arrow_forward_ios),
-    OnboardingScreenModelClass(
-        imagepath: "assets/images/house.png",
-        title: "Home Expense",
-        date: "16 March 2026",
-        amount: "\$920",
-        arrowicon: Icons.arrow_forward_ios),
-    OnboardingScreenModelClass(
-        imagepath: "assets/images/house.png",
-        title: "Shopping Expense",
-        date: "1 April 2026",
-        amount: "\$130",
-        arrowicon: Icons.arrow_forward_ios),
-    OnboardingScreenModelClass(
-        imagepath: "assets/images/house.png",
-        title: "Bike Expense",
-        date: "23 March 2026",
-        amount: "\$999",
-        arrowicon: Icons.arrow_forward_ios),
-    OnboardingScreenModelClass(
-        imagepath: "assets/images/book.png",
-        title: "Study Expense",
-        date: "21 June 2025",
-        amount: "\$563",
-        arrowicon: Icons.arrow_forward_ios),
-    OnboardingScreenModelClass(
-        imagepath: "assets/images/other.png",
-        title: "Pet Expense",
-        date: "09 January 2026",
-        amount: "\$293",
-        arrowicon: Icons.arrow_forward_ios),
-  ];
-
+class AppController extends GetxController {
+  RxList<OnboardingScreenModelClass> mytransaction =
+      <OnboardingScreenModelClass>[].obs;
   RxInt currentIndex = 0.obs;
 
   void changeIndex(int index) {
     currentIndex.value = index;
   }
 
-  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   TextEditingController titlecontroller = TextEditingController();
   TextEditingController amountcontroller = TextEditingController();
-  TextEditingController descriptioncontroller = TextEditingController();
+  //TextEditingController descriptioncontroller = TextEditingController();
 
-  void save() {
-    if (formKey.currentState!.validate()) {
-      Get.offAll(() => OnboardingScreen());
+  void save(GlobalKey<FormState> anyKey) {
+    if (anyKey.currentState!.validate()) {
+      String formattedDate = DateFormat('dd MMMM yyyy').format(DateTime.now());
+      final newEntry = OnboardingScreenModelClass(
+        imagepath: selectedCategory.value.iconpath,
+        title: selectedCategory.value.name,
+        //  date: DateTime.now().toString(),
+        date: formattedDate,
+        amount: "\$${amountcontroller.text}",
+        //  arrowicon: Icons.arrow_forward_ios,
+      );
+
+      mytransaction.add(newEntry);
+
+      Get.offAll(() => BottomNavbarr());
     }
+  }
+
+  var selectedCategory = Category(name: "", iconpath: "").obs;
+
+  void selectCategory(Category category) {
+    selectedCategory.value = category;
+    //titlecontroller.text = category.name;
+
+    titlecontroller.clear();
+    amountcontroller.clear();
+    Get.find<AppController>().currentIndex.value = 0;
+    Get.to(() => ExpenseScreen());
+  }
+
+  double calcluatetotal() {
+    double currentTotal = 0.0;
+    for (var item in mytransaction) {
+      String onlyNumber = item.amount
+          .replaceAll('\$', ""); // remove dollarsign and return number
+      double amount = double.tryParse(onlyNumber) ??
+          0.0; // tryParse string ko double ma convert krta ha
+      currentTotal = currentTotal + amount;
+    }
+    return currentTotal;
   }
 
   List<Category> myCategory = [
@@ -127,4 +133,51 @@ class Controller extends GetxController {
       name: "Other",
     ),
   ];
+  // for dialoug box
+  TextEditingController nameController = TextEditingController();
+
+  void saveData() {
+    String text = nameController.text.trim();
+
+    if (text.isEmpty) {
+      Get.snackbar("Error", "Please enter amount");
+    } else {
+      displayAmount.value = text;
+
+      Get.back();
+
+      nameController.clear();
+    }
+  }
+
+  @override
+  void onClose() {
+    nameController.dispose();
+    super.onClose();
+  }
+
+  RxString displayAmount = "20000.".obs;
+  double remainingBalance() {
+    double initialwallet = double.tryParse(displayAmount.value) ?? 0.0;
+    double expense = calcluatetotal();
+    return initialwallet - expense;
+  }
+
+  //for total amount jo top pr show ho rahu ha
+
+  //chart list
+  final List<ChartData> chartData = [
+    ChartData('Feb', 150, 120),
+    ChartData('Mar', 220, 140),
+    ChartData('Apr', 180, 160),
+    ChartData('May', 170, 230),
+    ChartData('Jun', 140, 110),
+    ChartData('Jul', 300, 200),
+  ];
+  // final List<Widget> screens = [
+  //   OnboardingScreen(),
+  //   TransactionScreen(),
+  //   AnalyticsPage(),
+  //   AccountScreen(),
+  // ];
 }
